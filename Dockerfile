@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/*.jar Mobistock-0.0.1-SNAPSHOT.jar
 
 # Expose the application port (change if needed)
-EXPOSE 8080
+EXPOSE 8181
 
 # Command to run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "Mobistock-0.0.1-SNAPSHOT.jar"]

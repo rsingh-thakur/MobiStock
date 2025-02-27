@@ -44,7 +44,7 @@ public class UserController {
 
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/get/{id}")
 	public ResponseEntity<User> getUserById(@PathVariable int id) {
 		User user = userService.getUserById(id);
 		if (user != null) {
@@ -79,36 +79,30 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/delete/{id}")
 	public void deleteUser(@PathVariable int id) {
 		userService.deleteUser(id);
 	}
-
+	
+	
 	@PostMapping("/reset-password")
-	public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
-		logger.info("Received API request to reset password for user: {}", request.getEmail());
+	public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request, HttpServletRequest httpRequest) {
+	    logger.info("Received API request to reset password for user: {}", request.getEmail());
+	    logger.info("Request URI: {}", httpRequest.getRequestURI());
+	    
+	    try {
+	        boolean isUpdated = userService.resetPassword(request.getCurrentPassword(), request.getEmail(),
+	                request.getNewPassword(), request.getConfNewPassword());
 
-		try {
-			boolean isUpdated = userService.resetPassword(request.getCurrentPassword(), request.getEmail(),
-					request.getNewPassword(), request.getConfNewPassword());
+	        ApiResponse<String> response = new ApiResponse<>("success", "Password reset successfully", null,
+	                HttpStatus.OK.value());
 
-			ApiResponse<String> response = new ApiResponse<>("success", "Password reset successfully", null,
-					HttpStatus.OK.value());
-
-			logger.info("Password reset successfully for user: {}", request.getEmail());
-			return ResponseEntity.ok(response);
-		} catch (ResourceNotFoundException e) {
-			logger.error("Error: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new ApiResponse<>("error", e.getMessage(), null, HttpStatus.NOT_FOUND.value()));
-		} catch (IllegalArgumentException e) {
-			logger.error("Validation Error: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(new ApiResponse<>("error", e.getMessage(), null, HttpStatus.BAD_REQUEST.value()));
-		} catch (Exception e) {
-			logger.error("Unexpected error occurred while resetting password for user: {}", request.getEmail(), e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-					new ApiResponse<>("error", "Something went wrong", null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
-		}
+	        logger.info("Password reset successfully for user: {}", request.getEmail());
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        logger.error("Unexpected error occurred while resetting password for user: {}", request.getEmail(), e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+	                new ApiResponse<>("error", "Something went wrong", null, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+	    }
 	}
 }
