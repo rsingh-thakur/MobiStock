@@ -41,7 +41,7 @@ public class SecurityConfig {
 				"/users/updatePasswordPage/**","/session-check/**","/users/reset-password/**", };
 		http.csrf(csrf -> csrf.disable());
 		http.authorizeHttpRequests(
-				(requests) -> requests.requestMatchers(PUBLIC_URL).permitAll().anyRequest().authenticated())
+				(requests) -> requests.requestMatchers("/**").permitAll().anyRequest().authenticated())
 				.formLogin((formLogin) -> formLogin.loginPage("/session-check").permitAll())
 				.logout((logout) -> logout.logoutUrl("/logout").logoutSuccessUrl("/login").invalidateHttpSession(true)
 						.deleteCookies("JSESSIONID", "jwtToken"))
